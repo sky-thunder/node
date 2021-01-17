@@ -3,7 +3,36 @@ const FULFILLED = 'FULFILLED'
 const REJECTED = 'REJECTED'
 
 function resovlePromise(promise2, x, resolve, reject) {
-  console.log(...arguments)
+  // console.log(...arguments)
+  if (promise2 === x) {
+    return reject(new TypeError('Chaining cycle detected for promise #<Promise>'))
+  }
+  if (typeof x === 'function' || (typeof x === 'object' && x !== null)) {
+    let called = false
+    try {
+      let then = x.then
+      if (typeof then === 'function') {
+        then.call(x, y => {
+          if (called) return
+          called = true
+          resovlePromise(promise2, y, resolve, reject)
+          // resolve(y)
+        }, e => {
+          if (called) return
+          called = true
+          reject(e)
+        })
+      } else {
+        resolve(x)
+      }
+    } catch (e) {
+      if (called) return
+      called = true
+      reject(e)
+    }
+  } else {
+    resolve(x)
+  }
 }
 class Promise {
   constructor(executer) {
@@ -38,6 +67,8 @@ class Promise {
     }
   }
   then(onFulfilled, onRejected) {
+    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : data => data
+    onRejected = typeof onRejected === 'function' ? onRejected : e => { throw e }
     const promise2 = new Promise((resolve, reject) => {
       if (this.state === FULFILLED) {
         setTimeout(() => {
@@ -67,7 +98,7 @@ class Promise {
               const x = onFulfilled(this.value)
               resovlePromise(promise2, x, resolve, reject)
             } catch (e) {
-
+              reject(e)
             }
           }, 0)
         })
@@ -87,6 +118,16 @@ class Promise {
 
     return promise2
   }
+}
+
+Promise.defer = Promise.deferred = function () {
+  let dfd = {}
+  dfd.promise = new Promise((resolve, reject) => {
+    dfd.resolve = resolve
+    dfd.reject = reject
+  })
+
+  return dfd
 }
 
 module.exports = Promise
