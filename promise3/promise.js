@@ -118,6 +118,9 @@ class Promise {
 
     return promise2
   }
+  catch (errorCallback) {
+    this.then(null, errorCallback)
+  }
 }
 
 Promise.defer = Promise.deferred = function () {
