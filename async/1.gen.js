@@ -1,9 +1,9 @@
 const fs = require('fs').promises
 
 function * read() {
-  let name = yield fs.readFile('./name.txt', 'utf-8')
+  let name = yield fs.readFile('name.txt', 'utf-8')
   console.log('name', name)
-  let age = yield fs.readFile('./age.txt', 'utf-8')
+  let age = yield fs.readFile('age.txt', 'utf-8')
   console.log('age', age)
   return {age, name}
 }

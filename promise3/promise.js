@@ -42,8 +42,12 @@ class Promise {
 
     this.onFulfilledCallbacks = []
     this.onRejectedCallbacks = []
-
+    
     const resolve = (value) => {
+      if (value instanceof Promise) {
+        return value.then(resolve, reject)
+      }
+
       if (this.state === PENDING) {
         this.state = FULFILLED
         this.value = value
@@ -121,6 +125,17 @@ class Promise {
   catch (errorCallback) {
     this.then(null, errorCallback)
   }
+}
+
+Promise.resolve = function (data) {
+  return new Promise((resolve) => {
+    resolve(data)
+  })
+}
+Promise.reject = function (reason) {
+  return new Promise((resolve, reject) => {
+    reject(reason)
+  })
 }
 
 Promise.defer = Promise.deferred = function () {
